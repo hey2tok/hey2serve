@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hey2Tok Video Gallery</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0c0c0c 0%, #1a1a1a 100%);
+            color: #f0f0f0;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .header {
+            padding: 2rem;
+            text-align: center;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4, #45b7d1);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 0.5rem;
+        }
+
+        .header p {
+            color: #888;
+            font-size: 1.1rem;
+        }
+
+        .main-container {
+            min-height: calc(100vh - 140px);
+            position: relative;
+        }
+
+        .filters-container {
+            background: rgba(20, 20, 20, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 2rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .filters-row {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1fr;
+            gap: 1.5rem;
+            max-width: 1200px;
+            margin: 0 auto;
+            align-items: end;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .filter-group label {
+            margin-bottom: 0.5rem;
+            color: #4ecdc4;
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+
+        .filter-input {
+            width: 100%;
+            padding: 0.8rem;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            color: #fff;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+        }
+
+        .filter-input:focus {
+            outline: none;
+            border-color: #4ecdc4;
+            box-shadow: 0 0 0 2px rgba(78, 205, 196, 0.2);
+        }
+
+        .gallery {
+            padding: 2rem;
+            transition: all 0.3s ease;
+        }
+
+        .gallery.shifted {
+            margin-right: 400px;
+        }
+
+        .video-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1.5rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .video-card {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            position: relative;
+        }
+
+        .video-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            border-color: rgba(78, 205, 196, 0.5);
+        }
+
+        .video-thumbnail {
+            width: 100%;
+            height: auto;
+            object-fit: contain;
+            display: block;
+        }
+
+        .video-card:hover .video-thumbnail {
+            transform: scale(1.05);
+        }
+
+        .video-info {
+            padding: 1rem;
+        }
+
+        .video-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: #fff;
+        }
+
+        .video-artist {
+            color: #4ecdc4;
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .video-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 0.5rem;
+        }
+
+        .genre-tag {
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+            color: white;
+            padding: 0.2rem 0.6rem;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        .event-tag {
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+            color: white;
+            padding: 0.2rem 0.6rem;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        .part-info {
+            color: #888;
+            font-size: 0.8rem;
+        }
+
+        .video-viewer {
+            position: fixed;
+            top: 0;
+            right: -400px;
+            width: 400px;
+            height: 100vh;
+            background: rgba(15, 15, 15, 0.98);
+            backdrop-filter: blur(20px);
+            border-left: 1px solid rgba(255, 255, 255, 0.1);
+            transition: right 0.3s ease;
+            z-index: 1000;
+            overflow-y: auto;
+            padding: 2rem;
+        }
+
+        .video-viewer.active {
+            right: 0;
+        }
+
+        .viewer-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .viewer-title {
+            font-size: 1.3rem;
+            color: #4ecdc4;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            color: #fff;
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 0.5rem;
+            border-radius: 50%;
+            transition: all 0.3s ease;
+        }
+
+        .close-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: rotate(90deg);
+        }
+
+        .tiktok-container {
+            margin-bottom: 2rem;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .metadata {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 1.5rem;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .metadata h4 {
+            color: #4ecdc4;
+            margin-bottom: 1rem;
+        }
+
+        .metadata-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.8rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .metadata-label {
+            color: #aaa;
+            font-weight: 500;
+        }
+
+        .metadata-value {
+            color: #fff;
+            text-align: right;
+            max-width: 60%;
+        }
+
+        .no-results {
+            text-align: center;
+            padding: 4rem;
+            color: #666;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 2rem;
+            color: #4ecdc4;
+        }
+
+        .error {
+            text-align: center;
+            padding: 2rem;
+            color: #ff6b6b;
+        }
+
+        @media (max-width: 768px) {
+            .filters-row {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+
+            .filters-container {
+                padding: 1rem;
+            }
+
+            .gallery {
+                padding: 1rem;
+            }
+
+            .gallery.shifted {
+                margin-right: 0;
+            }
+
+            .video-grid {
+                grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+                gap: 1rem;
+            }
+
+            .video-viewer {
+                width: 100%;
+                right: -100%;
+            }
+
+            .header h1 {
+                font-size: 2rem;
+            }
+        }
+
+        @media (max-width: 1024px) and (min-width: 769px) {
+            .filters-row {
+                grid-template-columns: 2fr 1fr 1fr;
+                gap: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <img src="logo.png" alt="Logo" style="height: 80px; margin-bottom: 1rem;" />
+        <h1>Hey2Tok Video Gallery</h1>
+        <p>"Talk thick, stir slow"</p>
+    </div>
+
+    <div class="main-container">
+        <div class="filters-container">
+            <div class="filters-row">
+                <div class="filter-group">
+                    <label for="search">Search</label>
+                    <input type="text" id="search" class="filter-input" placeholder="Search songs, artists...">
+                </div>
+
+                <div class="filter-group">
+                    <label for="artist-filter">Artist</label>
+                    <select id="artist-filter" class="filter-input">
+                        <option value="">All Artists</option>
+                    </select>
+                </div>
+
+                <div class="filter-group">
+                    <label for="venue-filter">Venue</label>
+                    <select id="venue-filter" class="filter-input">
+                        <option value="">All Venues</option>
+                    </select>
+                </div>
+
+                <div class="filter-group">
+                    <label for="event-filter">Event</label>
+                    <select id="event-filter" class="filter-input">
+                        <option value="">All Events</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <div class="gallery" id="gallery">
+            <div class="loading">Loading videos...</div>
+            <div class="video-grid" id="video-grid"></div>
+        </div>
+    </div>
+
+    <div class="video-viewer" id="video-viewer">
+        <div class="viewer-header">
+            <h3 class="viewer-title">Video Player</h3>
+            <button class="close-btn" onclick="closeViewer()">×</button>
+        </div>
+        <div class="tiktok-container" id="tiktok-container"></div>
+        <div class="metadata" id="metadata"></div>
+    </div>
+
+    <script>
+        let videosData = [];
+        let filteredVideos = [];
+
+        async function loadVideosData() {
+            const jsonScript = document.getElementById('video-data');
+            try {
+                const raw = jsonScript.textContent.trim();
+                const parsed = JSON.parse(raw);
+                return parsed;
+            } catch (error) {
+                console.error("Failed to parse embedded JSON data:", error);
+                throw error;
+            }
+        }
+
+        async function initializeApp() {
+            console.log('Initializing app...');
+            
+            try {
+                videosData = await loadVideosData();
+                filteredVideos = [...videosData];
+                
+                console.log('Loaded videos:', videosData.length);
+                
+                populateFilters();
+                renderVideos();
+                setupEventListeners();
+                
+                console.log('App initialized successfully');
+            } catch (error) {
+                console.error('Failed to initialize app:', error);
+                showError('Failed to load videos. Please make sure videos.json is in the same directory as this HTML file.');
+            }
+        }
+
+        function showError(message) {
+            const gallery = document.getElementById('gallery');
+            const loading = document.querySelector('.loading');
+            
+            if (loading) {
+                loading.style.display = 'none';
+            }
+            
+            const grid = document.getElementById('video-grid');
+            grid.innerHTML = `<div class="error">${message}</div>`;
+        }
+
+        function populateFilters() {
+            const artists = [...new Set(videosData.map(video => video.artist))];
+            const venues = [...new Set(videosData.map(video => video.venueName))];
+            // const genres = [...new Set(videosData.map(video => video.genre))];
+            const events = [...new Set(videosData.map(video => video.eventName))];
+
+            populateSelect('artist-filter', artists);
+            populateSelect('venue-filter', venues);
+            // populateSelect('genre-filter', genres);
+            populateSelect('event-filter', events);
+        }
+
+        function populateSelect(id, options) {
+            const select = document.getElementById(id);
+            // Clear existing options except the first one (All ...)
+            const firstOption = select.firstElementChild;
+            select.innerHTML = '';
+            select.appendChild(firstOption);
+            
+            options.forEach(option => {
+                const optionElement = document.createElement('option');
+                optionElement.value = option;
+                optionElement.textContent = option;
+                select.appendChild(optionElement);
+            });
+        }
+
+        function getImageUrl(imageFile) {
+            return `cover-photos/${imageFile}`;
+        }
+        
+        function renderVideos() {
+            const gallery = document.getElementById('gallery');
+            const grid = document.getElementById('video-grid');
+            const loading = document.querySelector('.loading');
+            
+            // Hide loading message
+            if (loading) {
+                loading.style.display = 'none';
+            }
+            
+            if (filteredVideos.length === 0) {
+                grid.innerHTML = '<div class="no-results">No videos found matching your filters.</div>';
+                return;
+            }
+
+            grid.innerHTML = filteredVideos.map((video, index) => `
+                <div class="video-card" onclick="openVideo(${index})">
+                    <img src="${getImageUrl(video.coverPhoto)}" alt="${video.song}" class="video-thumbnail" loading="lazy" onerror="this.src='https://via.placeholder.com/400x300/333/fff?text=No+Image'">
+                    <div class="video-info">
+                        <div class="video-title">${video.song}</div>
+                        <div class="video-artist">${video.artist}</div>
+                        <div class="video-meta">
+                            <span class="event-tag">${video.eventName}</span>
+                            ${video.part !== undefined && video.part !== null ? `<span class="part-info">Part ${video.part}</span>` : ''}
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+            
+            console.log(`Rendered ${filteredVideos.length} videos`);
+        }
+
+        function openVideo(index) {
+            const video = filteredVideos[index];
+            const viewer = document.getElementById('video-viewer');
+            const tiktokContainer = document.getElementById('tiktok-container');
+            const metadata = document.getElementById('metadata');
+            const gallery = document.getElementById('gallery');
+
+            // Add TikTok embed
+            tiktokContainer.innerHTML = video.embedCode || '<p style="color:#888;">No embed code available for this video.</p>';
+
+            // Always reload TikTok embed script to force reinitialization
+            const oldScript = document.querySelector('script[src*="tiktok.com/embed.js"]');
+            if (oldScript) {
+                oldScript.remove();
+            }
+
+            const newScript = document.createElement('script');
+            newScript.src = 'https://www.tiktok.com/embed.js';
+            newScript.async = true;
+            document.head.appendChild(newScript);
+
+            // Add metadata
+            metadata.innerHTML = `
+                <h4>Video Details</h4>
+                <div class="metadata-item">
+                    <span class="metadata-label">Song:</span>
+                    <span class="metadata-value">${video.song}</span>
+                </div>
+                <div class="metadata-item">
+                    <span class="metadata-label">Artist:</span>
+                    <span class="metadata-value">${video.artist}</span>
+                </div>
+                <div class="metadata-item">
+                    <span class="metadata-label">Event:</span>
+                    <span class="metadata-value">${video.eventName}</span>
+                </div>
+                <div class="metadata-item">
+                    <span class="metadata-label">Date:</span>
+                    <span class="metadata-value">${formatDate(video.eventDate)}</span>
+                </div>
+                <div class="metadata-item">
+                    <span class="metadata-label">Venue:</span>
+                    <span class="metadata-value">${video.venueName}</span>
+                </div>
+                <div class="metadata-item">
+                    <span class="metadata-label">Location:</span>
+                    <span class="metadata-value">${video.venueLocation}</span>
+                </div>
+                <div class="metadata-item">
+                    <span class="metadata-label">Posted:</span>
+                    <span class="metadata-value">${formatDate(video.datePosted)}</span>
+                </div>
+            `;
+
+            // Show viewer
+            viewer.classList.add('active');
+            gallery.classList.add('shifted');
+        }
+
+        function closeViewer() {
+            const viewer = document.getElementById('video-viewer');
+            const gallery = document.getElementById('gallery');
+            
+            viewer.classList.remove('active');
+            gallery.classList.remove('shifted');
+        }
+
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleDateString('en-US', { 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric' 
+            });
+        }
+
+        function filterVideos() {
+            const searchTerm = document.getElementById('search').value.toLowerCase();
+            const artistFilter = document.getElementById('artist-filter').value;
+            const venueFilter = document.getElementById('venue-filter').value;
+            const eventFilter = document.getElementById('event-filter').value;
+
+            filteredVideos = videosData.filter(video => {
+                const matchesSearch = !searchTerm || 
+                    video.song.toLowerCase().includes(searchTerm) ||
+                    video.artist.toLowerCase().includes(searchTerm);
+                
+                const matchesArtist = !artistFilter || video.artist === artistFilter;
+                const matchesVenue = !venueFilter || video.venueName === venueFilter;
+                const matchesEvent = !eventFilter || video.eventName === eventFilter;
+
+                return matchesSearch && matchesArtist && matchesVenue && matchesEvent;
+            });
+
+            renderVideos();
+        }
+
+        function setupEventListeners() {
+            document.getElementById('search').addEventListener('input', filterVideos);
+            document.getElementById('artist-filter').addEventListener('change', filterVideos);
+            document.getElementById('venue-filter').addEventListener('change', filterVideos);
+            document.getElementById('event-filter').addEventListener('change', filterVideos);
+
+            // Close viewer when clicking outside
+            document.addEventListener('click', (e) => {
+                const viewer = document.getElementById('video-viewer');
+                if (viewer.classList.contains('active') && !viewer.contains(e.target) && !e.target.closest('.video-card')) {
+                    closeViewer();
+                }
+            });
+
+            // Close viewer with Escape key
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') {
+                    closeViewer();
+                }
+            });
+        }
+
+        // Initialize the app when the page loads
+        document.addEventListener('DOMContentLoaded', initializeApp);
+    </script>
+<script id="video-data" type="application/json">
+[
+  {
+    "song": "Texas",
+    "artist": "BigXThaPlug",
+    "part": 1,
+    "version": "A",
+    "eventName": "Coachella 2025",
+    "eventDate": "2025-04-16",
+    "venueName": "Gobi",
+    "venueLocation": "Indio, CA",
+    "datePosted": "2025-04-18",
+    "coverPhoto": "bigxthaplug-texas-vA-p1-20250418.png",
+    "videoLink": "https://www.tiktok.com/@hey2tok/video/7494794872923196702",
+    "embedCode": "<blockquote class=\"tiktok-embed\" cite=\"https://www.tiktok.com/@hey2tok/video/7494794872923196702\" data-video-id=\"7494794872923196702\" style=\"max-width: 605px;min-width: 325px;\"><section></section></blockquote><script async src=\"https://www.tiktok.com/embed.js\"><\/script>"
+  }
+]
+</script>
+
+<a href="https://www.tiktok.com/@hey2tok" target="_blank" id="floating-logo">
+    <img src="logo.png" alt="Rabbit Logo">
+</a>
+
+<style>
+    #floating-logo {
+        position: fixed;
+        bottom: 24px;
+        right: 24px;
+        z-index: 999;
+        display: inline-block;
+        border-radius: 50%;
+        overflow: hidden;
+        background: linear-gradient(135deg, rgba(255, 255, 255, 0.9), rgba(240, 240, 240, 0.8));
+        border: 3px solid rgba(78, 205, 196, 0.4);
+        box-shadow: 0 0 12px rgba(0, 0, 0, 0.3), inset 0 0 0 2px rgba(255, 255, 255, 0.8);
+        transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+    }
+
+    #floating-logo img {
+        display: block;
+        width: 80px;
+        height: 80px;
+        object-fit: cover;
+        border-radius: 50%;
+        transition: transform 0.3s ease;
+        padding: 4px;
+    }
+
+    #floating-logo:hover {
+        transform: scale(1.1);
+        box-shadow: 0 0 20px rgba(78, 205, 196, 0.8), inset 0 0 0 2px rgba(255, 255, 255, 1);
+        border-color: rgba(78, 205, 196, 0.8);
+    }
+
+    #floating-logo:hover img {
+        transform: rotate(-5deg);
+    }
+</style>
+</body>
+</html>
