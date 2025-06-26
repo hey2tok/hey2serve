@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:wght@700&display=swap" rel="stylesheet">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Hey2Tok Video Gallery</title>
     <style>
@@ -108,55 +109,84 @@
             margin: 0 auto;
         }
 
+        /* ─── Card container ─────────────────────────────────────────── */
         .video-card {
             background: rgba(255, 255, 255, 0.05);
             border-radius: 12px;
-            overflow: hidden;
-            transition: all 0.3s ease;
+            overflow: hidden;                  /* keeps everything inside */
             cursor: pointer;
             border: 1px solid rgba(255, 255, 255, 0.1);
             position: relative;
+        
+            /* lift animation */
+            transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+            will-change: transform;
+        
+            /* flex layout so the info block can push meta to the bottom */
+            display: flex;
+            flex-direction: column;
         }
-
+        
         .video-card:hover {
             transform: translateY(-5px);
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
             border-color: rgba(78, 205, 196, 0.5);
         }
-
+        
+        /* ─── Thumbnail ──────────────────────────────────────────────── */
         .video-thumbnail {
             width: 100%;
-            height: auto;
-            object-fit: contain;
+            aspect-ratio: 4 / 5;    /* keeps all cards the same height */
+            object-fit: contain;    /* ← change “cover” ➜ “contain” */
+            background: #000;       /* optional: fills any letter-box area */
             display: block;
+            transition: filter 0.3s ease;
         }
-
+        
+        /* Hover effect: subtle brighten (⚠️ NO scale, so no cropping) */
         .video-card:hover .video-thumbnail {
-            transform: scale(1.05);
+            filter: brightness(1.08);
         }
 
         .video-info {
             padding: 1rem;
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1;
         }
-
+        
         .video-title {
             font-size: 1.1rem;
             font-weight: 600;
-            margin-bottom: 0.5rem;
             color: #fff;
+            margin-bottom: 0.4rem;
+            text-align: left;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            min-height: 2.8rem;
         }
-
+        
         .video-artist {
-            color: #4ecdc4;
+            font-family: 'EB Garamond', serif;
+            font-weight: 700;
             font-size: 0.9rem;
-            margin-bottom: 0.5rem;
+            margin-bottom: 0.4rem;
+            text-align: left;
+            display: -webkit-box;
+            -webkit-line-clamp: 1;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            min-height: 1.2rem;
+            color: #4ecdc4;
         }
-
+        
         .video-meta {
+            margin-top: auto;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-top: 0.5rem;
         }
 
         .genre-tag {
@@ -323,6 +353,18 @@
                 gap: 1rem;
             }
         }
+
+        @media (min-width: 1200px) {
+            .video-grid {
+                grid-template-columns: repeat(6, 1fr);
+            }
+        }
+        
+        @media (max-width: 1199px) {
+            .video-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
     </style>
 </head>
 <body>
@@ -429,18 +471,18 @@
         function populateFilters() {
             const artists = [...new Set(videosData.map(video => video.artist))];
             const venues = [...new Set(videosData.map(video => video.venueName))];
-            // const genres = [...new Set(videosData.map(video => video.genre))];
+            
             const events = [...new Set(videosData.map(video => video.eventName))];
 
             populateSelect('artist-filter', artists);
             populateSelect('venue-filter', venues);
-            // populateSelect('genre-filter', genres);
+            
             populateSelect('event-filter', events);
         }
 
         function populateSelect(id, options) {
             const select = document.getElementById(id);
-            // Clear existing options except the first one (All ...)
+            
             const firstOption = select.firstElementChild;
             select.innerHTML = '';
             select.appendChild(firstOption);
@@ -462,7 +504,7 @@
             const grid = document.getElementById('video-grid');
             const loading = document.querySelector('.loading');
             
-            // Hide loading message
+            
             if (loading) {
                 loading.style.display = 'none';
             }
@@ -496,10 +538,10 @@
             const metadata = document.getElementById('metadata');
             const gallery = document.getElementById('gallery');
 
-            // Add TikTok embed
+            
             tiktokContainer.innerHTML = video.embedCode || '<p style="color:#888;">No embed code available for this video.</p>';
 
-            // Always reload TikTok embed script to force reinitialization
+            
             const oldScript = document.querySelector('script[src*="tiktok.com/embed.js"]');
             if (oldScript) {
                 oldScript.remove();
@@ -510,7 +552,7 @@
             newScript.async = true;
             document.head.appendChild(newScript);
 
-            // Add metadata
+            
             metadata.innerHTML = `
                 <h4>Video Details</h4>
                 <div class="metadata-item">
@@ -543,7 +585,7 @@
                 </div>
             `;
 
-            // Show viewer
+            
             viewer.classList.add('active');
             gallery.classList.add('shifted');
         }
@@ -593,7 +635,7 @@
             document.getElementById('venue-filter').addEventListener('change', filterVideos);
             document.getElementById('event-filter').addEventListener('change', filterVideos);
 
-            // Close viewer when clicking outside
+            
             document.addEventListener('click', (e) => {
                 const viewer = document.getElementById('video-viewer');
                 if (viewer.classList.contains('active') && !viewer.contains(e.target) && !e.target.closest('.video-card')) {
@@ -601,7 +643,7 @@
                 }
             });
 
-            // Close viewer with Escape key
+            
             document.addEventListener('keydown', (e) => {
                 if (e.key === 'Escape') {
                     closeViewer();
@@ -609,7 +651,7 @@
             });
         }
 
-        // Initialize the app when the page loads
+        
         document.addEventListener('DOMContentLoaded', initializeApp);
     </script>
 <script id="video-data" type="application/json">
@@ -683,6 +725,48 @@
     "coverPhoto": "pushat-comebackbaby-vA-p2-20250624.png",
     "videoLink": "https://www.tiktok.com/@hey2tok/video/7518948790196260126",
     "embedCode": "<blockquote class=\"tiktok-embed\" cite=\"https://www.tiktok.com/@hey2tok/video/7518948790196260126\" data-video-id=\"7518948790196260126\" style=\"max-width: 605px;min-width: 325px;\"><section></section></blockquote><script async src=\"https://www.tiktok.com/embed.js\"><\/script>"
+  },
+  {
+    "song": "The Games We Play",
+    "artist": "Pusha T",
+    "part": 1,
+    "version": "A",
+    "eventName": "Coachella 2025",
+    "eventDate": "2023-04-15",
+    "venueName": "Heineken House",
+    "venueLocation": "Indio, CA",
+    "datePosted": "2025-06-22",
+    "coverPhoto": "pushat-thegamesweplay-vA-p1-20250622.png",
+    "videoLink": "https://www.tiktok.com/@hey2tok/video/7518586294205697310",
+    "embedCode": "<blockquote class=\"tiktok-embed\" cite=\"https://www.tiktok.com/@hey2tok/video/7518586294205697310\" data-video-id=\"7518586294205697310\" style=\"max-width: 605px;min-width: 325px;\"><section></section></blockquote><script async src=\"https://www.tiktok.com/embed.js\"><\/script>"
+  },
+  {
+    "song": "Dreamin of the Past",
+    "artist": "Pusha T",
+    "part": 2,
+    "version": "A",
+    "eventName": "Coachella 2025",
+    "eventDate": "2023-04-15",
+    "venueName": "Heineken House",
+    "venueLocation": "Indio, CA",
+    "datePosted": "2025-06-20",
+    "coverPhoto": "pushat-dreaminofthepast-vA-p2-20250620.png",
+    "videoLink": "https://www.tiktok.com/@hey2tok/video/7518189799912541470",
+    "embedCode": "<blockquote class=\"tiktok-embed\" cite=\"https://www.tiktok.com/@hey2tok/video/7518189799912541470\" data-video-id=\"7518189799912541470\" style=\"max-width: 605px;min-width: 325px;\"><section></section></blockquote><script async src=\"https://www.tiktok.com/embed.js\"><\/script>"
+  },
+  {
+    "song": "If You Know You Know",
+    "artist": "Pusha T",
+    "part": 3,
+    "version": "A",
+    "eventName": "Coachella 2025",
+    "eventDate": "2023-04-15",
+    "venueName": "Heineken House",
+    "venueLocation": "Indio, CA",
+    "datePosted": "2025-06-20",
+    "coverPhoto": "pushat-ifyouknowyouknow-vA-p3-20250620.png",
+    "videoLink": "https://www.tiktok.com/@hey2tok/video/7517883189289880862",
+    "embedCode": "<blockquote class=\"tiktok-embed\" cite=\"https://www.tiktok.com/@hey2tok/video/7517883189289880862\" data-video-id=\"7517883189289880862\" style=\"max-width: 605px;min-width: 325px;\"><section></section></blockquote><script async src=\"https://www.tiktok.com/embed.js\"><\/script>"
   }
 ]
 </script>
