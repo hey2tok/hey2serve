@@ -370,59 +370,69 @@
     </style>
 </head>
 <body>
-    <div class="header">
-        <img src="logo.png" alt="Logo" style="height: 80px; margin-bottom: 1rem;" />
-        <h1>Hey2Tok Video Gallery</h1>
-        <p>"Talk thick, stir slow"</p>
+    <!-- Cloudflare Turnstile widget -->
+    <div id="turnstile-container" class="cf-turnstile"
+         data-sitekey="0x4AAAAAABkzgIX_5vQq4Hf3"
+         data-callback="turnstileSuccess"
+         data-size="flexible"
+         style="width:100%; height:100vh; display:flex; justify-content:center; align-items:center;">
     </div>
 
-    <div class="main-container">
-        <div class="filters-container">
-            <div class="filters-row">
-                <div class="filter-group">
-                    <label for="search">Search</label>
-                    <input type="text" id="search" class="filter-input" placeholder="Search songs, artists...">
-                </div>
+    <!-- Main content hidden until captcha is solved -->
+    <div id="page-content" style="display:none;">
+        <div class="header">
+            <img src="logo.png" alt="Logo" style="height: 80px; margin-bottom: 1rem;" />
+            <h1>Hey2Tok Video Gallery</h1>
+            <p>"Talk thick, stir slow"</p>
+        </div>
 
-                <div class="filter-group">
-                    <label for="artist-filter">Artist</label>
-                    <select id="artist-filter" class="filter-input">
-                        <option value="">All Artists</option>
-                    </select>
-                </div>
+        <div class="main-container">
+            <div class="filters-container">
+                <div class="filters-row">
+                    <div class="filter-group">
+                        <label for="search">Search</label>
+                        <input type="text" id="search" class="filter-input" placeholder="Search songs, artists...">
+                    </div>
 
-                <div class="filter-group">
-                    <label for="venue-filter">Venue</label>
-                    <select id="venue-filter" class="filter-input">
-                        <option value="">All Venues</option>
-                    </select>
-                </div>
+                    <div class="filter-group">
+                        <label for="artist-filter">Artist</label>
+                        <select id="artist-filter" class="filter-input">
+                            <option value="">All Artists</option>
+                        </select>
+                    </div>
 
-                <div class="filter-group">
-                    <label for="event-filter">Event</label>
-                    <select id="event-filter" class="filter-input">
-                        <option value="">All Events</option>
-                    </select>
+                    <div class="filter-group">
+                        <label for="venue-filter">Venue</label>
+                        <select id="venue-filter" class="filter-input">
+                            <option value="">All Venues</option>
+                        </select>
+                    </div>
+
+                    <div class="filter-group">
+                        <label for="event-filter">Event</label>
+                        <select id="event-filter" class="filter-input">
+                            <option value="">All Events</option>
+                        </select>
+                    </div>
                 </div>
+            </div>
+
+            <div class="gallery" id="gallery">
+                <div class="loading">Loading videos...</div>
+                <div class="video-grid" id="video-grid"></div>
             </div>
         </div>
 
-        <div class="gallery" id="gallery">
-            <div class="loading">Loading videos...</div>
-            <div class="video-grid" id="video-grid"></div>
+        <div class="video-viewer" id="video-viewer">
+            <div class="viewer-header">
+                <h3 class="viewer-title">Video Player</h3>
+                <button class="close-btn" onclick="closeViewer()">×</button>
+            </div>
+            <div class="tiktok-container" id="tiktok-container"></div>
+            <div class="metadata" id="metadata"></div>
         </div>
-    </div>
 
-    <div class="video-viewer" id="video-viewer">
-        <div class="viewer-header">
-            <h3 class="viewer-title">Video Player</h3>
-            <button class="close-btn" onclick="closeViewer()">×</button>
-        </div>
-        <div class="tiktok-container" id="tiktok-container"></div>
-        <div class="metadata" id="metadata"></div>
-    </div>
-
-    <script>
+        <script>
         let videosData = [];
         let filteredVideos = [];
 
@@ -654,9 +664,9 @@
 
         
         document.addEventListener('DOMContentLoaded', initializeApp);
-    </script>
-<script id="video-data" type="application/json">
-[
+        </script>
+        <script id="video-data" type="application/json">
+        [
   {
     "song": "Rock N Roll",
     "artist": "Pusha T",
@@ -1168,46 +1178,64 @@
     "uncroppedCoverPhoto": "pushat-letthesmokersshinethecoupes-vA-p0-20250414-full.png"
   }
 ]
-</script>
+        </script>
 
-<a href="https://www.tiktok.com/@hey2tok" target="_blank" id="floating-logo">
-    <img src="logo.png" alt="Rabbit Logo">
-</a>
+        <a href="https://www.tiktok.com/@hey2tok" target="_blank" id="floating-logo">
+            <img src="logo.png" alt="Rabbit Logo">
+        </a>
 
-<style>
-    #floating-logo {
-        position: fixed;
-        bottom: 24px;
-        right: 24px;
-        z-index: 999;
-        display: inline-block;
-        border-radius: 50%;
-        overflow: hidden;
-        background: linear-gradient(135deg, rgba(255, 255, 255, 0.9), rgba(240, 240, 240, 0.8));
-        border: 3px solid rgba(78, 205, 196, 0.4);
-        box-shadow: 0 0 12px rgba(0, 0, 0, 0.3), inset 0 0 0 2px rgba(255, 255, 255, 0.8);
-        transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
-    }
+        <style>
+            #floating-logo {
+                position: fixed;
+                bottom: 24px;
+                right: 24px;
+                z-index: 999;
+                display: inline-block;
+                border-radius: 50%;
+                overflow: hidden;
+                background: linear-gradient(135deg, rgba(255, 255, 255, 0.9), rgba(240, 240, 240, 0.8));
+                border: 3px solid rgba(78, 205, 196, 0.4);
+                box-shadow: 0 0 12px rgba(0, 0, 0, 0.3), inset 0 0 0 2px rgba(255, 255, 255, 0.8);
+                transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+            }
 
-    #floating-logo img {
-        display: block;
-        width: 80px;
-        height: 80px;
-        object-fit: cover;
-        border-radius: 50%;
-        transition: transform 0.3s ease;
-        padding: 4px;
-    }
+            #floating-logo img {
+                display: block;
+                width: 80px;
+                height: 80px;
+                object-fit: cover;
+                border-radius: 50%;
+                transition: transform 0.3s ease;
+                padding: 4px;
+            }
 
-    #floating-logo:hover {
-        transform: scale(1.1);
-        box-shadow: 0 0 20px rgba(78, 205, 196, 0.8), inset 0 0 0 2px rgba(255, 255, 255, 1);
-        border-color: rgba(78, 205, 196, 0.8);
-    }
+            #floating-logo:hover {
+                transform: scale(1.1);
+                box-shadow: 0 0 20px rgba(78, 205, 196, 0.8), inset 0 0 0 2px rgba(255, 255, 255, 1);
+                border-color: rgba(78, 205, 196, 0.8);
+            }
 
-    #floating-logo:hover img {
-        transform: rotate(-5deg);
-    }
-</style>
+            #floating-logo:hover img {
+                transform: rotate(-5deg);
+            }
+        </style>
+    </div> <!-- Close page-content div -->
+
+    <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+    <script>
+      function turnstileSuccess(token) {
+        console.log("Turnstile passed:", token);
+        document.getElementById('turnstile-container').style.display = 'none';
+        document.getElementById('page-content').style.display = 'block';
+      }
+    </script>
+    <noscript>
+      <style>
+        #page-content { display: block !important; }
+      </style>
+      <div style="padding:2rem; text-align:center; color:#faa;">
+        Please enable JavaScript to view this page.
+      </div>
+    </noscript>
 </body>
 </html>
